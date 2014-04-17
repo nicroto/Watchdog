@@ -22,10 +22,11 @@ Watchdog has nothing to do with with trial periods or evaluation launches count.
   ```
 
 2. Setup a dependency between your project and Watchdog
-  * Find `Watchdog.xcodeproj` inside of the cloned repository directory and drag it into the Xcode' Project Navigator.
+  * Find `Watchdog.xcodeproj` inside of the cloned repository directory and drag it into the Xcode' Project Navigator (as first child item of the project).
   * Configure your application target to be dependent on Watchdog.framework.
   * Link your application with the Watchdog.framework.
-  * Add a "Copy Frameworks" build phase and add Watchdog.framework there.
+  * Add a "Copy Files" build phase (select "frameworks") and add Watchdog.framework there.
+  * Add a "Copy Files" build phase (select "resources") and add WatchdogResources.bundle.
 
 ## Configuring Watchdog
 
@@ -81,7 +82,7 @@ SRC.publicKeyPEM = @"-----BEGIN PUBLIC KEY-----\n ... -----END PUBLIC KEY-----";
 Set the `serialsStaticBlacklist` property to the array of blacklisted serials (if you have some):
 ```objective-c
 ...
-SRC.serialsStaticBlacklist = @(@"GAXAEFIAQCDINLKOVR4F6XFQUREC4RKX536WUFNFAIKQBCNWZF73M3YJCRWC76LRB3EUPD7D7SAWW", ...);
+SRC.serialsStaticBlacklist = @[@"GAXAEFIAQCDINLKOVR4F6XFQUREC4RKX536WUFNFAIKQBCNWZF73M3YJCRWC76LRB3EUPD7D7SAWW", ...];
 ```
 
 ## Using Watchdog

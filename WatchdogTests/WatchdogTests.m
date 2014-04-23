@@ -68,11 +68,11 @@ describe(@"WDRegistrationController", ^
   {
     NSString* name = @"John Appleseed";
     
-    NSString* nameInBase32 = @"JJXWQ3RAIFYHA3DFONSWKZA";
+    NSString* nameInBase64 = @"Sm9obiBBcHBsZXNlZWQ";
     
     NSString* serial = @"FUNNYSERIALNUMBER";
     
-    NSString* link = [NSString stringWithFormat: @"application-wd://%@:%@", nameInBase32, serial];
+    NSString* link = [NSString stringWithFormat: @"application-wd://%@:%@", nameInBase64, serial];
     
     NSDictionary* dict = [SRC decomposeQuickApplyLink: link utilizingBundleName: @"Application"];
     
@@ -93,7 +93,7 @@ describe(@"WDRegistrationController", ^
     // Valid credentials from the "1024 DSA" sample.
     NSString* name = @"John Appleseed";
     
-    NSString* serial = @"GAWAEFA46ZQC6LB32U4S4OAPKMAY3DQP5FHSLEYCCQFTP4ZLD7EM5IJTQUX7NZVPLVXN7WYH3M";
+    NSString* serial = @"MCwCFANaWbsbaPQG5w49wKnET/18mae6AhQtjQNkCi31Qx/rCb7ZNcHrx7Rn+A==";
     
     [SRC registerWithCustomerName: name serial: serial handler: ^(enum WDSerialVerdict verdict)
     {
@@ -106,14 +106,16 @@ describe(@"WDRegistrationController", ^
       done();
     }];
   });
-  
+
   it(@"should transition to the unregistered state", ^
   {
     expect(SRC.applicationState).to.equal(WDRegisteredApplicationState);
-    
+
     [SRC deauthorizeAccount];
-    
-    expect(SRC.applicationState).to.equal(WDUnregisteredApplicationState);
+    dispatch_async(dispatch_get_main_queue(), ^()
+    {
+      expect(SRC.applicationState).to.equal(WDUnregisteredApplicationState);
+    });
   });
 });
 

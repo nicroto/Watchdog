@@ -69,14 +69,14 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   // Colon (name/serial separator) not found — link is corrupted.
   if(rangeOfColon.location == NSNotFound) return nil;
   
-  NSString* customerNameInBase32 = nil;
+  NSString* customerNameInBase64 = nil;
   
   NSString* serial = nil;
   
   // -substringToIndex or -substringFromIndex can raise an exception...
   @try
   {
-    customerNameInBase32 = [nameColonSerial substringToIndex: rangeOfColon.location];
+    customerNameInBase64 = [nameColonSerial substringToIndex: rangeOfColon.location];
     
     serial = [nameColonSerial substringFromIndex: rangeOfColon.location + 1];
   }
@@ -85,21 +85,21 @@ static WDRegistrationWindowController* registrationWindowController = nil;
     return nil;
   }
   
-  if(!customerNameInBase32 || !serial) return nil;
+  if(!customerNameInBase64 || !serial) return nil;
   
-  // If we are here we already got two base32 encoded parts: customer name & the serial itself. Lets decode a name!
+  // If we are here we already got two base64 encoded parts: customer name & the serial itself. Lets decode a name!
   
   NSDictionary* result = nil;
   
-  SecTransformRef base32DecodeTransform = SecDecodeTransformCreate(kSecBase32Encoding, NULL);
+  SecTransformRef base64DecodeTransform = SecDecodeTransformCreate(kSecBase64Encoding, NULL);
   
-  if(base32DecodeTransform)
+  if(base64DecodeTransform)
   {
-    CFDataRef tempData = CFBridgingRetain([customerNameInBase32 dataUsingEncoding: NSUTF8StringEncoding]);
+    CFDataRef tempData = CFBridgingRetain([customerNameInBase64 dataUsingEncoding: NSUTF8StringEncoding]);
     
-    if(SecTransformSetAttribute(base32DecodeTransform, kSecTransformInputAttributeName, tempData, NULL))
+    if(SecTransformSetAttribute(base64DecodeTransform, kSecTransformInputAttributeName, tempData, NULL))
     {
-      CFTypeRef customerNameData = SecTransformExecute(base32DecodeTransform, NULL);
+      CFTypeRef customerNameData = SecTransformExecute(base64DecodeTransform, NULL);
       
       if(customerNameData)
       {
@@ -111,7 +111,7 @@ static WDRegistrationWindowController* registrationWindowController = nil;
     
     CFRelease(tempData);
     
-    CFRelease(base32DecodeTransform);
+    CFRelease(base64DecodeTransform);
   }
   
   return result;
@@ -384,16 +384,16 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   
   CFErrorRef tempError;
   
-  // Creating transformation from base32 string to the actual data.
-  SecTransformRef base32DecodeTransform = SecDecodeTransformCreate(kSecBase32Encoding, &tempError);
+  // Creating transformation from base64 string to the actual data.
+  SecTransformRef base64DecodeTransform = SecDecodeTransformCreate(kSecBase64Encoding, &tempError);
   
-  if(base32DecodeTransform)
+  if(base64DecodeTransform)
   {
     CFDataRef tempData = CFBridgingRetain([serial dataUsingEncoding: NSUTF8StringEncoding]);
     
-    if(SecTransformSetAttribute(base32DecodeTransform, kSecTransformInputAttributeName, tempData, &tempError))
+    if(SecTransformSetAttribute(base64DecodeTransform, kSecTransformInputAttributeName, tempData, &tempError))
     {
-      CFTypeRef signature = SecTransformExecute(base32DecodeTransform, &tempError);
+      CFTypeRef signature = SecTransformExecute(base64DecodeTransform, &tempError);
       
       if(signature)
       {
@@ -407,7 +407,7 @@ static WDRegistrationWindowController* registrationWindowController = nil;
     
     CFRelease(tempData);
     
-    CFRelease(base32DecodeTransform);
+    CFRelease(base64DecodeTransform);
   }
   
   if(!reachedEnd)

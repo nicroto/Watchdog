@@ -35,7 +35,6 @@
 		B5CD062818C34F17005268CB /* WatchdogResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B59516E318C2665100FE2026 /* WatchdogResources.bundle */; };
 		B5CD062A18C34F56005268CB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5CD062918C34F56005268CB /* Security.framework */; };
 		B5CD062B18C34F5D005268CB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5C91ADD14F568DC009696B3 /* QuartzCore.framework */; };
-		B5DBD727175FABBA001F4709 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5DBD726175FABBA001F4709 /* SenTestingKit.framework */; };
 		B5DBD728175FABBA001F4709 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5F0B4EB14F54B8B0069FFAF /* Cocoa.framework */; };
 		B5DBD735175FABBA001F4709 /* WatchdogTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B5DBD734175FABBA001F4709 /* WatchdogTests.m */; };
 		B5DBD76D175FB2A2001F4709 /* Watchdog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5F0B4E814F54B8B0069FFAF /* Watchdog.framework */; };
@@ -135,8 +134,7 @@
 		B5CD062918C34F56005268CB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B5DAA40E1761D86100A82BF8 /* WDRegistrationStatusController+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WDRegistrationStatusController+Private.h"; sourceTree = SOURCE_ROOT; };
 		B5DAA40F1761D8C000A82BF8 /* WDSerialEntryController+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WDSerialEntryController+Private.h"; sourceTree = SOURCE_ROOT; };
-		B5DBD725175FABBA001F4709 /* WatchdogTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchdogTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B5DBD726175FABBA001F4709 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		B5DBD725175FABBA001F4709 /* WatchdogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WatchdogTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DBD72F175FABBA001F4709 /* WatchdogTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WatchdogTests-Info.plist"; sourceTree = "<group>"; };
 		B5DBD734175FABBA001F4709 /* WatchdogTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WatchdogTests.m; sourceTree = "<group>"; };
 		B5DBD736175FABBA001F4709 /* WatchdogTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WatchdogTests-Prefix.pch"; sourceTree = "<group>"; };
@@ -203,7 +201,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5DBD76D175FB2A2001F4709 /* Watchdog.framework in Frameworks */,
-				B5DBD727175FABBA001F4709 /* SenTestingKit.framework in Frameworks */,
 				B5DBD728175FABBA001F4709 /* Cocoa.framework in Frameworks */,
 				E46E029A327B40FBB7955F20 /* libPods.a in Frameworks */,
 			);
@@ -407,7 +404,7 @@
 			isa = PBXGroup;
 			children = (
 				B5F0B4E814F54B8B0069FFAF /* Watchdog.framework */,
-				B5DBD725175FABBA001F4709 /* WatchdogTests.octest */,
+				B5DBD725175FABBA001F4709 /* WatchdogTests.xctest */,
 				B59516E318C2665100FE2026 /* WatchdogResources.bundle */,
 				B5CD056318C3385F005268CB /* libWatchdogStaticLib.a */,
 				B5CD05F618C34EF6005268CB /* Sample.app */,
@@ -424,7 +421,6 @@
 				B59516E618C2665100FE2026 /* Foundation.framework */,
 				B53AA448155ED4B900745650 /* Security.framework */,
 				B5C91ADD14F568DC009696B3 /* QuartzCore.framework */,
-				B5DBD726175FABBA001F4709 /* SenTestingKit.framework */,
 				B5CD057018C3385F005268CB /* XCTest.framework */,
 				E0C598D5503140F096DEA880 /* libPods.a */,
 			);
@@ -541,8 +537,8 @@
 			);
 			name = WatchdogTests;
 			productName = WatchdogTests;
-			productReference = B5DBD725175FABBA001F4709 /* WatchdogTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productReference = B5DBD725175FABBA001F4709 /* WatchdogTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		B5F0B4E714F54B8B0069FFAF /* Watchdog */ = {
 			isa = PBXNativeTarget;
@@ -971,7 +967,6 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = expecta/build/Release;
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Debug;
 		};
@@ -1005,7 +1000,6 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = expecta/build/Release;
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
 		};

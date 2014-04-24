@@ -12,8 +12,16 @@
 
 // These method prototypes are here for unit testing purposes.
 
-- (NSDictionary*) decomposeQuickApplyLink: (NSString*) link utilizingBundleName: (NSString*) bundleName;
+- (NSDictionary*) decomposeQuickApplyLink: (NSString*) link;
 
-- (BOOL) isSerial: (NSString*) serial conformsToCustomerName: (NSString*) name error: (NSError**) error;
+- (NSString*) getUrlWithoutProtocol: (NSString*) url;
+
+- (BOOL) isSerial: (NSString*) serial conformsToCustomerData: (NSArray*) customerData error: (NSError**) error;
+
+- (NSString*) signatureReconstructHandler: (NSArray*)customerData;
+
+- (NSString*) urlDecodeString: (NSString*) str;
+
+- (NSDictionary*) parseJson: (NSString*) str;
 
 @end

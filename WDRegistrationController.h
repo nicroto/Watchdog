@@ -9,6 +9,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #import <Foundation/Foundation.h>
+#import "WDSerialEntryController.h"
 
 @class WDRegistrationWindowController;
 
@@ -53,13 +54,19 @@ enum WDSerialVerdict
 // Should be set to the array of the blacklisted serials.
 @property(readwrite, strong, atomic) NSArray* serialsStaticBlacklist;
 
-// Accepts a Quick-Apply link string in form of "appname-wd://GFUENLVNDLPOJHJB:GAWWERTYUIOPEDCNJIKLKJHGFDXCVBNM". Runs asynchronously. Shows either alerts or registration window.
-- (void) registerWithQuickApplyLink: (NSString*) link;
+// Should be set with custom Serial Entry controller if your app requires one
+@property(readwrite, strong, atomic) id<WDSerialEntryControllerProtocol> customSerialEntryController;
+
+// Should be set with custom Serial Entry controller if your app requires one
+@property(readwrite, strong, atomic) NSString* (^customSignatureReconstructHandler)(NSArray*);
 
 typedef void (^SerialCheckHandler)(enum WDSerialVerdict verdict);
 
+// Accepts a Quick-Apply link string in form of "appname-wd://GFUENLVNDLPOJHJB:GAWWERTYUIOPEDCNJIKLKJHGFDXCVBNM". Runs asynchronously. Shows either alerts or registration window.
+- (void) registerWithQuickApplyLink: (NSString*) link handler: (SerialCheckHandler) handler;
+
 // Tries to register app with the supplied customer name & serial pair then calls handler with the appropriate flag. Runs asynchronously.
-- (void) registerWithCustomerName: (NSString*) name serial: (NSString*) serial handler: (SerialCheckHandler) handler;
+- (void) registerWithCustomerData: (NSArray*) customerData serial: (NSString*) serial handler: (SerialCheckHandler) handler;
 
 // Opens application registration window. Should be called from the main thread.
 - (IBAction) showRegistrationWindow: (id) sender;

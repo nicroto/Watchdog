@@ -90,8 +90,15 @@
   
   // Pushing data to the WDRegistrationController.
   WDRegistrationController* SRC = [WDRegistrationController sharedRegistrationController];
-  
-  [SRC registerWithCustomerName: name serial: serial handler: ^(enum WDSerialVerdict verdict)
+
+  NSArray* customerData = @[
+    @{
+      @"Name": @"name",
+      @"Value": name
+    }
+  ];
+
+  [SRC registerWithCustomerData: customerData serial: serial handler: ^(enum WDSerialVerdict verdict)
   {
     dispatch_async(dispatch_get_main_queue(), ^()
     {

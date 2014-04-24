@@ -8,7 +8,14 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
-@interface WDSerialEntryController : NSViewController
+@protocol WDSerialEntryControllerProtocol
+
+@property(readwrite, assign) NSTextField* customerName;
+@property(readwrite, assign) NSView* view;
+
+@end
+
+@interface WDSerialEntryController : NSViewController<WDSerialEntryControllerProtocol>
 
 @property(readwrite, assign) IBOutlet NSTextField* customerName;
 

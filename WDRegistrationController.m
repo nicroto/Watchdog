@@ -21,6 +21,7 @@
 NSString* const ApplicationStateKeyPath = @"applicationState";
 
 NSString* const WDCustomerNameKey = @"WDCustomerName";
+NSString* const WDCustomerData = @"WDCustomerData";
 
 NSString* const WDSerialKey = @"WDSerial";
 
@@ -52,60 +53,61 @@ static WDRegistrationWindowController* registrationWindowController = nil;
 }
 
 // Supplied link should look like this: bundlename-wd://WEDSCVBNMRFHNMJJFCV:GAWWSXFRFVBJU...CVBNMHSGHFKAJSHC.
-- (NSDictionary*) decomposeQuickApplyLink: (NSString*) link utilizingBundleName: (NSString*) bundleName
+- (NSDictionary*) decomposeQuickApplyLink: (NSString*) link
 {
   NSParameterAssert(link);
-  
-  NSParameterAssert(bundleName);
-  
-  // Concatenating URL scheme part with suffix.
-  NSString* schemeWithSlashes = [[bundleName lowercaseString] stringByAppendingString: @"-wd://"];
-  
+
   // Wiping out link prefix.
-  NSString* nameColonSerial = [link stringByReplacingOccurrencesOfString: schemeWithSlashes withString: @""];
-  
+  NSString* nameColonSerial = [self getUrlWithoutProtocol:link];
+
   NSRange rangeOfColon = [nameColonSerial rangeOfString: @":"];
-  
+
   // Colon (name/serial separator) not found — link is corrupted.
   if(rangeOfColon.location == NSNotFound) return nil;
   
-  NSString* customerNameInBase64 = nil;
+  NSString* customerDataUrlEncoded = nil;
   
-  NSString* serial = nil;
+  NSString* serialUrlEncoded = nil;
   
   // -substringToIndex or -substringFromIndex can raise an exception...
   @try
   {
-    customerNameInBase64 = [nameColonSerial substringToIndex: rangeOfColon.location];
+    customerDataUrlEncoded = [nameColonSerial substringToIndex: rangeOfColon.location];
     
-    serial = [nameColonSerial substringFromIndex: rangeOfColon.location + 1];
+    serialUrlEncoded = [nameColonSerial substringFromIndex: rangeOfColon.location + 1];
   }
   @catch(NSException* exception)
   {
     return nil;
   }
   
-  if(!customerNameInBase64 || !serial) return nil;
+  if(!customerDataUrlEncoded || !serialUrlEncoded) return nil;
+
+  NSString* customerDataBase64 = [self urlDecodeString:customerDataUrlEncoded];
+  NSString* serialBase64 = [self urlDecodeString:serialUrlEncoded];
+
+  if(!customerDataBase64 || !serialBase64) return nil;
   
   // If we are here we already got two base64 encoded parts: customer name & the serial itself. Lets decode a name!
-  
+
   NSDictionary* result = nil;
   
   SecTransformRef base64DecodeTransform = SecDecodeTransformCreate(kSecBase64Encoding, NULL);
   
   if(base64DecodeTransform)
   {
-    CFDataRef tempData = CFBridgingRetain([customerNameInBase64 dataUsingEncoding: NSUTF8StringEncoding]);
+    CFDataRef tempData = CFBridgingRetain([customerDataBase64 dataUsingEncoding: NSUTF8StringEncoding]);
     
     if(SecTransformSetAttribute(base64DecodeTransform, kSecTransformInputAttributeName, tempData, NULL))
     {
-      CFTypeRef customerNameData = SecTransformExecute(base64DecodeTransform, NULL);
+      CFTypeRef customerDataJsonData = SecTransformExecute(base64DecodeTransform, NULL);
       
-      if(customerNameData)
+      if(customerDataJsonData)
       {
-        NSString* customerName = [[NSString alloc] initWithData: CFBridgingRelease(customerNameData) encoding: NSUTF8StringEncoding];
+        NSString* customerDataJson = [[NSString alloc] initWithData: CFBridgingRelease(customerDataJsonData) encoding: NSUTF8StringEncoding];
+        NSDictionary* customerData = [self parseJson:customerDataJson];
         
-        result = @{@"name": customerName, @"serial": serial};
+        result = @{@"customerData": customerData[@"customerData"], @"serial": serialBase64};
       }
     }
     
@@ -117,56 +119,69 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   return result;
 }
 
-- (void) registerWithQuickApplyLink: (NSString*) link
+- (NSString*) getUrlWithoutProtocol: (NSString*) url{
+  NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@".*://" options:NSRegularExpressionCaseInsensitive error:NULL];
+  NSString *modifiedString = [regex stringByReplacingMatchesInString:url options:0 range:NSMakeRange(0, [url length]) withTemplate:@""];
+  return modifiedString;
+}
+
+- (void) registerWithQuickApplyLink: (NSString*) link handler: (SerialCheckHandler) handler
 {
   NSParameterAssert(link);
-  
-  // Getting non-localized application name.
-  NSString* bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey: @"CFBundleName"];
-  
-  NSDictionary* dict = [self decomposeQuickApplyLink: link utilizingBundleName: bundleName];
-  
+
+  NSDictionary* dict = [self decomposeQuickApplyLink: link];
+
   if(!dict)
   {
     [[[self class] corruptedQuickApplyLinkAlert] runModal];
-    
+
     return;
   }
-  
-  [self registerWithCustomerName: dict[@"name"] serial: dict[@"serial"] handler: ^(enum WDSerialVerdict verdict)
+
+  [self registerWithCustomerData: dict[@"customerData"] serial: dict[@"serial"] handler: ^(enum WDSerialVerdict verdict)
   {
-    dispatch_async(dispatch_get_main_queue(), ^()
+    dispatch_async(dispatch_get_main_queue(), ^
     {
-      if(verdict != WDValidSerialVerdict)
-      {
-        [[[self class] alertWithSerialVerdict: verdict] runModal];
-        
-        return;
+      if (handler) {
+        handler( verdict );
+      } else {
+        if(verdict != WDValidSerialVerdict)
+        {
+          [[[self class] alertWithSerialVerdict: verdict] runModal];
+
+          return;
+        }
+
+        [self showRegistrationWindow: self];
       }
-      
-      [self showRegistrationWindow: self];
     });
   }];
 }
 
-// Tries to register application with supplied customer name & serial pair.
-- (void) registerWithCustomerName: (NSString*) name serial: (NSString*) serial handler: (SerialCheckHandler) handler
+// Tries to register application with supplied customer data & serial.
+- (void) registerWithCustomerData: (NSArray*) customerData serial: (NSString*) serial handler: (SerialCheckHandler) handler
 {
-  NSParameterAssert(name);
-  
+  NSParameterAssert(customerData);
   NSParameterAssert(serial);
-  
+  NSAssert([customerData count] > 0, @"customerData has at least one item.");
+
+  NSString* customerName = ((NSDictionary*)customerData[0])[@"Name"];
+
+  NSAssert([customerName isEqualToString: @"name"], @"first item in the customer's data should be user's name.");
+
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
   {
     // Launching full-featured customer data check.
-    [self complexCheckOfCustomerName: name serial: serial completionHandler: ^(enum WDSerialVerdict verdict)
+    [self complexCheckOfCustomerData: customerData serial: serial completionHandler: ^(enum WDSerialVerdict verdict)
     {
       // If all of the tests pass...
       if(verdict == WDValidSerialVerdict)
       {
         NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
         
-        [userDefaults setObject: name forKey: WDCustomerNameKey];
+        [userDefaults setObject: customerData[0][@"Value"] forKey: WDCustomerNameKey];
+        
+        [userDefaults setObject:customerData forKey:WDCustomerData];
         
         [userDefaults setObject: serial forKey: WDSerialKey];
         
@@ -219,13 +234,13 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   {
     // Looking for serial data in user preferences.
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    
-    NSString* name = [userDefaults stringForKey: WDCustomerNameKey];
-    
+
+    NSArray* customerData = [userDefaults arrayForKey:WDCustomerData];
+
     NSString* serial = [userDefaults stringForKey: WDSerialKey];
     
     // If one of parameters is missing — treat it (silently) like unregistered state.
-    if(!name || !serial)
+    if(!customerData || !serial)
     {
       dispatch_async(dispatch_get_main_queue(), ^()
       {
@@ -234,8 +249,8 @@ static WDRegistrationWindowController* registrationWindowController = nil;
       
       return;
     };
-    
-    [self complexCheckOfCustomerName: name serial: serial completionHandler: ^(enum WDSerialVerdict serialVerdict)
+
+    [self complexCheckOfCustomerData:customerData serial:serial completionHandler: ^(enum WDSerialVerdict serialVerdict)
     {
       dispatch_async(dispatch_get_main_queue(), ^()
       {
@@ -256,89 +271,6 @@ static WDRegistrationWindowController* registrationWindowController = nil;
 
 #pragma mark - Private Methods
 
-+ (NSAlert*) corruptedQuickApplyLinkAlert
-{
-  NSAlert* alert = [[NSAlert alloc] init];
-  
-  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Corrupted Quick-Apply Link", nil, [WDResources resourcesBundle], @"Alert title.")];
-  
-  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"Please enter your registration data manualy.", nil, [WDResources resourcesBundle], @"Alert body.")];
-  
-  return alert;
-}
-
-+ (NSAlert*) corruptedRegistrationDataAlert
-{
-  NSAlert* alert = [[NSAlert alloc] init];
-  
-  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Serial validation fail", nil, [WDResources resourcesBundle], @"Alert title.")];
-  
-  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"Your serial is corrupted. Please, try again.", nil, [WDResources resourcesBundle], @"Alert body.")];
-  
-  return alert;
-}
-
-+ (NSAlert*) blacklistedRegistrationDataAlert
-{
-  NSAlert* alert = [[NSAlert alloc] init];
-  
-  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Serial validation fail", nil, [WDResources resourcesBundle], @"Alert title.")];
-  
-  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"Your serial is blacklisted. Please, contact support to get a new key.", nil, [WDResources resourcesBundle], @"Alert body.")];
-  
-  return alert;
-}
-
-+ (NSAlert*) piratedRegistrationDataAlert
-{
-  NSAlert* alert = [[NSAlert alloc] init];
-  
-  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Serial validation fail", nil, [WDResources resourcesBundle], @"Alert title.")];
-  
-  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"It seems like you are using pirated serial.", nil, [WDResources resourcesBundle], @"Alert body.")];
-  
-  return alert;
-}
-
-+ (NSAlert*) alertWithSerialVerdict: (enum WDSerialVerdict) verdict
-{
-  NSAlert* alert = nil;
-  
-  switch(verdict)
-  {
-    // Compiler generates warning if this constant not handled in switch.
-    case WDValidSerialVerdict:
-    {
-      alert = nil;
-      
-      break;
-    }
-    
-    case WDCorruptedSerialVerdict:
-    {
-      alert = [self corruptedRegistrationDataAlert];
-      
-      break;
-    }
-    
-    case WDBlacklistedSerialVerdict:
-    {
-      alert = [self blacklistedRegistrationDataAlert];
-      
-      break;
-    }
-    
-    case WDPiratedSerialVerdict:
-    {
-      alert = [self piratedRegistrationDataAlert];
-      
-      break;
-    }
-  }
-  
-  return alert;
-}
-
 // Lazy RegistrationWindowController constructor.
 - (WDRegistrationWindowController*) registrationWindowController
 {
@@ -347,19 +279,19 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   return registrationWindowController;
 }
 
-- (void) complexCheckOfCustomerName: (NSString*) name serial: (NSString*) serial completionHandler: (SerialCheckHandler) handler
+- (void) complexCheckOfCustomerData: (NSArray*) customerData serial: (NSString*) serial completionHandler: (SerialCheckHandler) handler
 {
-  NSParameterAssert(name);
+  NSParameterAssert(customerData);
   
   NSParameterAssert(serial);
-  
-  // Если лицензия не расшифровалась...
-  if(![self isSerial: serial conformsToCustomerName: name error: NULL])
+
+  // If this isn't a valid serial for customer's data
+  if(![self isSerial: serial conformsToCustomerData: customerData error: NULL])
   {
     handler(WDCorruptedSerialVerdict); return;
   }
   
-  // Если лицензия найдена в одном из черных списков...
+  // Is the license blacklisted
   if([self isSerialInStaticBlacklist: serial] || [self isSerialInDynamicBlacklist: serial])
   {
     handler(WDBlacklistedSerialVerdict); return;
@@ -368,55 +300,81 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   handler([self synchronousServerCheckWithSerial: serial]);
 }
 
-- (BOOL) isSerial: (NSString*) serial conformsToCustomerName: (NSString*) name error: (NSError* __autoreleasing *) error
+- (BOOL) isSerial: (NSString*) serial conformsToCustomerData: (NSArray*) customerData error: (NSError* __autoreleasing *) error
 {
   // These parameters are mandatory.
   NSParameterAssert(serial);
-  
-  NSParameterAssert(name);
-  
-  // There is no reason to validate anything if supplied strings are void.
-  if([serial length] == 0 || [name length] == 0) return NO;
-  
+
+  NSParameterAssert(customerData);
+
+  // There is no reason to validate anything if supplied params are void.
+  if([serial length] == 0) return NO;
+
   BOOL result = NO;
-  
+
   BOOL reachedEnd = NO;
-  
+
   CFErrorRef tempError;
-  
+
   // Creating transformation from base64 string to the actual data.
   SecTransformRef base64DecodeTransform = SecDecodeTransformCreate(kSecBase64Encoding, &tempError);
-  
+
   if(base64DecodeTransform)
   {
     CFDataRef tempData = CFBridgingRetain([serial dataUsingEncoding: NSUTF8StringEncoding]);
-    
+
     if(SecTransformSetAttribute(base64DecodeTransform, kSecTransformInputAttributeName, tempData, &tempError))
     {
       CFTypeRef signature = SecTransformExecute(base64DecodeTransform, &tempError);
-      
+
       if(signature)
       {
         NSData* tempSignature = CFBridgingRelease(signature);
-        
-        result = [self verifySignature: tempSignature data: [name dataUsingEncoding: NSUTF8StringEncoding] error: error];
-        
+
+        NSString* reconstructed;
+        if (self.customSignatureReconstructHandler) {
+          reconstructed = self.customSignatureReconstructHandler(customerData);
+        } else {
+          reconstructed = [self signatureReconstructHandler:customerData];
+        }
+
+        result = [self verifySignature: tempSignature data: [reconstructed dataUsingEncoding: NSUTF8StringEncoding] error: error];
+
         reachedEnd = YES;
       }
     }
-    
+
     CFRelease(tempData);
-    
+
     CFRelease(base64DecodeTransform);
   }
-  
+
   if(!reachedEnd)
   {
     // Control flow didn't reached end → something went wrong.
     if(error != NULL) *error = CFBridgingRelease(tempError);
   }
-  
+
   return result;
+}
+
+- (NSString*) signatureReconstructHandler: (NSArray*)customerData {
+  NSMutableArray* items = [[NSMutableArray alloc] init];
+  [customerData enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+    NSString* value = ((NSDictionary*)obj)[@"Value"];
+    [items addObject:value];
+  }];
+
+  // will produce string like: "Nikolay Tsenkovsome@email.com..."
+  return [[NSArray arrayWithArray: items] componentsJoinedByString: @""];
+}
+
+- (NSString*) urlDecodeString: (NSString*) str {
+    return [str stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (NSDictionary*) parseJson: (NSString*) str {
+  return [NSJSONSerialization JSONObjectWithData: [str dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:NULL];
 }
 
 - (BOOL) verifySignature: (NSData*) signature data: (NSData*) sourceData error: (NSError* __autoreleasing *) error
@@ -609,6 +567,89 @@ static WDRegistrationWindowController* registrationWindowController = nil;
   if(!dynamicBlacklist) dynamicBlacklist = [NSArray array];
   
   [userDefaults setObject: [dynamicBlacklist arrayByAddingObject: serial] forKey: WDDynamicBlacklistKey];
+}
+
++ (NSAlert*) corruptedQuickApplyLinkAlert
+{
+  NSAlert* alert = [[NSAlert alloc] init];
+  
+  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Corrupted Quick-Apply Link", nil, [WDResources resourcesBundle], @"Alert title.")];
+  
+  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"Please enter your registration data manualy.", nil, [WDResources resourcesBundle], @"Alert body.")];
+  
+  return alert;
+}
+
++ (NSAlert*) corruptedRegistrationDataAlert
+{
+  NSAlert* alert = [[NSAlert alloc] init];
+  
+  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Serial validation fail", nil, [WDResources resourcesBundle], @"Alert title.")];
+  
+  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"Your serial is corrupted. Please, try again.", nil, [WDResources resourcesBundle], @"Alert body.")];
+  
+  return alert;
+}
+
++ (NSAlert*) blacklistedRegistrationDataAlert
+{
+  NSAlert* alert = [[NSAlert alloc] init];
+  
+  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Serial validation fail", nil, [WDResources resourcesBundle], @"Alert title.")];
+  
+  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"Your serial is blacklisted. Please, contact support to get a new key.", nil, [WDResources resourcesBundle], @"Alert body.")];
+  
+  return alert;
+}
+
++ (NSAlert*) piratedRegistrationDataAlert
+{
+  NSAlert* alert = [[NSAlert alloc] init];
+  
+  [alert setMessageText: NSLocalizedStringFromTableInBundle(@"Serial validation fail", nil, [WDResources resourcesBundle], @"Alert title.")];
+  
+  [alert setInformativeText: NSLocalizedStringFromTableInBundle(@"It seems like you are using pirated serial.", nil, [WDResources resourcesBundle], @"Alert body.")];
+  
+  return alert;
+}
+
++ (NSAlert*) alertWithSerialVerdict: (enum WDSerialVerdict) verdict
+{
+  NSAlert* alert = nil;
+  
+  switch(verdict)
+  {
+    // Compiler generates warning if this constant not handled in switch.
+    case WDValidSerialVerdict:
+    {
+      alert = nil;
+      
+      break;
+    }
+    
+    case WDCorruptedSerialVerdict:
+    {
+      alert = [self corruptedRegistrationDataAlert];
+      
+      break;
+    }
+    
+    case WDBlacklistedSerialVerdict:
+    {
+      alert = [self blacklistedRegistrationDataAlert];
+      
+      break;
+    }
+    
+    case WDPiratedSerialVerdict:
+    {
+      alert = [self piratedRegistrationDataAlert];
+      
+      break;
+    }
+  }
+  
+  return alert;
 }
 
 @end

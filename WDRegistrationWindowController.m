@@ -22,7 +22,7 @@
 
 @implementation WDRegistrationWindowController
 {
-  WDSerialEntryController* serialEntryController;
+  id<WDSerialEntryControllerProtocol> serialEntryController;
   
   WDRegistrationStatusController* registrationStatusController;
 }
@@ -86,9 +86,14 @@
 {
   if(!serialEntryController)
   {
-    serialEntryController = [WDSerialEntryController new];
+    WDRegistrationController* SRC = [WDRegistrationController sharedRegistrationController];
+    if (SRC.customSerialEntryController) {
+      serialEntryController = SRC.customSerialEntryController;
+    } else {
+      serialEntryController = [WDSerialEntryController new];
+    }
   }
-  
+
   return serialEntryController;
 }
 

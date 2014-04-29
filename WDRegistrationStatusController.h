@@ -8,7 +8,9 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
-@interface WDRegistrationStatusController : NSViewController
+#import "WDRegistrationStatusControllerProtocol.h"
+
+@interface WDRegistrationStatusController : NSViewController<WDRegistrationStatusControllerProtocol>
 
 @property(readwrite, assign) IBOutlet NSButton* dismissButton;
 

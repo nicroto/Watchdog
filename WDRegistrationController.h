@@ -9,7 +9,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #import <Foundation/Foundation.h>
-#import "WDSerialEntryController.h"
+#import "WDSerialEntryControllerProtocol.h"
+#import "WDRegistrationStatusControllerProtocol.h"
 
 @class WDRegistrationWindowController;
 
@@ -56,6 +57,9 @@ enum WDSerialVerdict
 
 // Should be set with custom Serial Entry controller if your app requires one
 @property(readwrite, strong, atomic) id<WDSerialEntryControllerProtocol> customSerialEntryController;
+
+// Should be set with custom Registration Status controller if your app requires one
+@property(readwrite, strong, atomic) id<WDRegistrationStatusControllerProtocol> customRegistrationStatusController;
 
 // Should be set with custom Serial Entry controller if your app requires one
 @property(readwrite, strong, atomic) NSString* (^customSignatureReconstructHandler)(NSArray*);

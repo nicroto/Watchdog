@@ -24,7 +24,7 @@
 {
   id<WDSerialEntryControllerProtocol> serialEntryController;
   
-  WDRegistrationStatusController* registrationStatusController;
+  id<WDRegistrationStatusControllerProtocol> registrationStatusController;
 }
 
 - (id) init
@@ -82,7 +82,7 @@
 }
 
 // Lazy WDSerialEntryController constructor.
-- (WDSerialEntryController*) serialEntryController
+- (id<WDSerialEntryControllerProtocol>) serialEntryController
 {
   if(!serialEntryController)
   {
@@ -98,11 +98,16 @@
 }
 
 // Lazy WDRegistrationStatusController constructor.
-- (WDRegistrationStatusController*) registrationStatusController
+- (id<WDRegistrationStatusControllerProtocol>) registrationStatusController
 {
   if(!registrationStatusController)
   {
-    registrationStatusController = [WDRegistrationStatusController new];
+    WDRegistrationController* SRC = [WDRegistrationController sharedRegistrationController];
+    if (SRC.customRegistrationStatusController) {
+      registrationStatusController = SRC.customRegistrationStatusController;
+    } else {
+      registrationStatusController = [WDRegistrationStatusController new];
+    }
   }
 
   return registrationStatusController;

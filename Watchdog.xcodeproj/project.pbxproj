@@ -10,6 +10,7 @@
 		3E257C36190A31160002763C /* WDPlistConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = B5DBD77C17608851001F4709 /* WDPlistConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3E257C38190A323C0002763C /* WDSerialEntryControllerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3E257C39190A35AD0002763C /* WDSerialEntryController.h in Headers */ = {isa = PBXBuildFile; fileRef = B5F614F214F54EB500C8565A /* WDSerialEntryController.h */; };
+		3EFC1F3D190FCAB5009C978C /* WDRegistrationStatusControllerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 3EFC1F3C190FC6F8009C978C /* WDRegistrationStatusControllerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B531F5B818C219A500E65397 /* ShakeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = B531F5B618C219A500E65397 /* ShakeAnimation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B531F5B918C219A500E65397 /* ShakeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = B531F5B718C219A500E65397 /* ShakeAnimation.m */; };
 		B531F5EA18C2316D00E65397 /* WDResources.h in Headers */ = {isa = PBXBuildFile; fileRef = B531F5E818C2316D00E65397 /* WDResources.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -99,6 +100,7 @@
 
 /* Begin PBXFileReference section */
 		3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDSerialEntryControllerProtocol.h; sourceTree = SOURCE_ROOT; };
+		3EFC1F3C190FC6F8009C978C /* WDRegistrationStatusControllerProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WDRegistrationStatusControllerProtocol.h; sourceTree = SOURCE_ROOT; };
 		7115994328CA4D7887F07092 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		B51E82F318C3689900261E3A /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B531F5B618C219A500E65397 /* ShakeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShakeAnimation.h; sourceTree = "<group>"; };
@@ -356,10 +358,10 @@
 			isa = PBXGroup;
 			children = (
 				B595170318C267FD00FE2026 /* WDSerialEntry.xib */,
+				3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */,
 				B5F614F214F54EB500C8565A /* WDSerialEntryController.h */,
 				B5DAA40F1761D8C000A82BF8 /* WDSerialEntryController+Private.h */,
 				B5F614F314F54EB500C8565A /* WDSerialEntryController.m */,
-				3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */,
 			);
 			name = "Serial entry controller";
 			path = Watchdog;
@@ -369,6 +371,7 @@
 			isa = PBXGroup;
 			children = (
 				B595170618C2681200FE2026 /* WDRegistrationStatus.xib */,
+				3EFC1F3C190FC6F8009C978C /* WDRegistrationStatusControllerProtocol.h */,
 				B5F614F514F54EB500C8565A /* WDRegistrationStatusController.h */,
 				B5DAA40E1761D86100A82BF8 /* WDRegistrationStatusController+Private.h */,
 				B5E036BC159F8CBC00007230 /* WDRegistrationStatusController.m */,
@@ -459,6 +462,7 @@
 			files = (
 				B5F6150A14F54F0400C8565A /* Watchdog.h in Headers */,
 				3E257C38190A323C0002763C /* WDSerialEntryControllerProtocol.h in Headers */,
+				3EFC1F3D190FCAB5009C978C /* WDRegistrationStatusControllerProtocol.h in Headers */,
 				3E257C36190A31160002763C /* WDPlistConstants.h in Headers */,
 				B531F5EA18C2316D00E65397 /* WDResources.h in Headers */,
 				B531F5B818C219A500E65397 /* ShakeAnimation.h in Headers */,

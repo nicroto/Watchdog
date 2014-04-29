@@ -7,16 +7,10 @@
 //  Created by Konstantin Pavlikhin on 27/01/10.
 //  
 ////////////////////////////////////////////////////////////////////////////////
-
-@protocol WDSerialEntryControllerProtocol
-
-@property(readwrite, assign) NSTextField* customerName;
-@property(readwrite, assign) NSView* view;
-
-@end
+#import "WDSerialEntryControllerProtocol.h"
 
 @interface WDSerialEntryController : NSViewController<WDSerialEntryControllerProtocol>
 
-@property(readwrite, assign) IBOutlet NSTextField* customerName;
+@property(readwrite, assign) IBOutlet NSTextField* firstResponderTextField;
 
 @end

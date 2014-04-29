@@ -104,24 +104,50 @@
   {
     registrationStatusController = [WDRegistrationStatusController new];
   }
-  
+
   return registrationStatusController;
+}
+
+- (void) onAddedView: (NSView*) newView{
+  NSView* parentView = self.window.contentView;
+  NSRect parentFrame = [self.window frame];
+  CGSize newSize = [newView frame].size;
+  int titlebarHeight = 22; // TODO: how to get this automatically?
+
+  // resize the window to fit the added view
+  newSize.height += titlebarHeight;
+  parentFrame.origin.y += parentFrame.size.height; // remove the old height
+  parentFrame.origin.y -= newSize.height; // add the new height
+  parentFrame.size = newSize;
+
+  // center the added view
+  [newView setFrameOrigin:NSMakePoint(
+    (NSWidth([parentView bounds]) - NSWidth([newView frame])) / 2,
+    (NSHeight([parentView bounds]) - NSHeight([newView frame])) / 2
+  )];
+  [newView setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin | NSViewMinYMargin | NSViewMaxYMargin];
+
+  // render changed view
+  [self.window setFrame: parentFrame display: YES animate: NO];
 }
 
 // Fade-in/fade-out subview switcher.
 - (void) switchToRegistrationStatusSubview
 {
   NSView* contentView = self.window.contentView;
-  
+  NSView* newView = [[self registrationStatusController] view];
+
   if([[contentView subviews] containsObject: [serialEntryController view]])
   {
-    [[contentView animator] replaceSubview: [serialEntryController view] with: [[self registrationStatusController] view]];
+    [[contentView animator] replaceSubview: [serialEntryController view] with: newView];
   }
   else
   {
-    [contentView addSubview: [[self registrationStatusController] view]];
+    [contentView addSubview: newView];
   }
-  
+
+  [self onAddedView: newView];
+
   [self.window makeFirstResponder: registrationStatusController.dismissButton];
 }
 
@@ -129,17 +155,20 @@
 - (void) switchToSerialEntrySubview
 {
   NSView* contentView = self.window.contentView;
-  
+  NSView* newView = [[self serialEntryController] view];
+
   if([[contentView subviews] containsObject: [registrationStatusController view]])
   {
-    [[contentView animator] replaceSubview: [registrationStatusController view] with: [[self serialEntryController] view]];
+    [[contentView animator] replaceSubview: [registrationStatusController view] with: newView];
   }
   else
   {
-    [[[self window] contentView] addSubview: [[self serialEntryController] view]];
+    [[[self window] contentView] addSubview: newView];
   }
+
+  [self onAddedView:newView];
   
-  [self.window makeFirstResponder: serialEntryController.customerName];
+  [self.window makeFirstResponder: serialEntryController.firstResponderTextField];
 }
 
 @end

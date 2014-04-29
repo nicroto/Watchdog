@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B531F5B818C219A500E65397 /* ShakeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = B531F5B618C219A500E65397 /* ShakeAnimation.h */; };
+		3E257C36190A31160002763C /* WDPlistConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = B5DBD77C17608851001F4709 /* WDPlistConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E257C38190A323C0002763C /* WDSerialEntryControllerProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E257C39190A35AD0002763C /* WDSerialEntryController.h in Headers */ = {isa = PBXBuildFile; fileRef = B5F614F214F54EB500C8565A /* WDSerialEntryController.h */; };
+		B531F5B818C219A500E65397 /* ShakeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = B531F5B618C219A500E65397 /* ShakeAnimation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B531F5B918C219A500E65397 /* ShakeAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = B531F5B718C219A500E65397 /* ShakeAnimation.m */; };
-		B531F5EA18C2316D00E65397 /* WDResources.h in Headers */ = {isa = PBXBuildFile; fileRef = B531F5E818C2316D00E65397 /* WDResources.h */; };
+		B531F5EA18C2316D00E65397 /* WDResources.h in Headers */ = {isa = PBXBuildFile; fileRef = B531F5E818C2316D00E65397 /* WDResources.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B531F5EB18C2316D00E65397 /* WDResources.m in Sources */ = {isa = PBXBuildFile; fileRef = B531F5E918C2316D00E65397 /* WDResources.m */; };
 		B53AA449155ED4B900745650 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B53AA448155ED4B900745650 /* Security.framework */; };
 		B595170018C2676C00FE2026 /* WDRegistrationWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = B59516FE18C2676C00FE2026 /* WDRegistrationWindow.xib */; };
@@ -55,7 +58,6 @@
 		B5F0B4EC14F54B8B0069FFAF /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5F0B4EB14F54B8B0069FFAF /* Cocoa.framework */; };
 		B5F614FC14F54EB500C8565A /* WDRegistrationController.h in Headers */ = {isa = PBXBuildFile; fileRef = B5F614EF14F54EB500C8565A /* WDRegistrationController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B5F614FD14F54EB500C8565A /* WDRegistrationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5F614F014F54EB500C8565A /* WDRegistrationController.m */; };
-		B5F614FF14F54EB500C8565A /* WDSerialEntryController.h in Headers */ = {isa = PBXBuildFile; fileRef = B5F614F214F54EB500C8565A /* WDSerialEntryController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B5F6150014F54EB500C8565A /* WDSerialEntryController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5F614F314F54EB500C8565A /* WDSerialEntryController.m */; };
 		B5F6150214F54EB500C8565A /* WDRegistrationStatusController.h in Headers */ = {isa = PBXBuildFile; fileRef = B5F614F514F54EB500C8565A /* WDRegistrationStatusController.h */; };
 		B5F6150714F54EB500C8565A /* WDRegistrationWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = B5F614FA14F54EB500C8565A /* WDRegistrationWindowController.h */; };
@@ -96,6 +98,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDSerialEntryControllerProtocol.h; sourceTree = SOURCE_ROOT; };
 		7115994328CA4D7887F07092 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		B51E82F318C3689900261E3A /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B531F5B618C219A500E65397 /* ShakeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShakeAnimation.h; sourceTree = "<group>"; };
@@ -356,6 +359,7 @@
 				B5F614F214F54EB500C8565A /* WDSerialEntryController.h */,
 				B5DAA40F1761D8C000A82BF8 /* WDSerialEntryController+Private.h */,
 				B5F614F314F54EB500C8565A /* WDSerialEntryController.m */,
+				3E257C37190A323C0002763C /* WDSerialEntryControllerProtocol.h */,
 			);
 			name = "Serial entry controller";
 			path = Watchdog;
@@ -453,11 +457,13 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B531F5EA18C2316D00E65397 /* WDResources.h in Headers */,
 				B5F6150A14F54F0400C8565A /* Watchdog.h in Headers */,
-				B5F614FF14F54EB500C8565A /* WDSerialEntryController.h in Headers */,
-				B5F614FC14F54EB500C8565A /* WDRegistrationController.h in Headers */,
+				3E257C38190A323C0002763C /* WDSerialEntryControllerProtocol.h in Headers */,
+				3E257C36190A31160002763C /* WDPlistConstants.h in Headers */,
+				B531F5EA18C2316D00E65397 /* WDResources.h in Headers */,
 				B531F5B818C219A500E65397 /* ShakeAnimation.h in Headers */,
+				B5F614FC14F54EB500C8565A /* WDRegistrationController.h in Headers */,
+				3E257C39190A35AD0002763C /* WDSerialEntryController.h in Headers */,
 				B5F6150214F54EB500C8565A /* WDRegistrationStatusController.h in Headers */,
 				B5F6150714F54EB500C8565A /* WDRegistrationWindowController.h in Headers */,
 			);

@@ -73,7 +73,7 @@
 
 - (IBAction) proceed: (id) sender
 {
-  NSString* name = [[self class] sanitizeString: [self.customerName stringValue]];
+  NSString* name = [[self class] sanitizeString: [self.firstResponderTextField stringValue]];
   
   NSString* serial = [[self class] sanitizeString: [self.licenseKey stringValue]];
   
@@ -129,7 +129,7 @@
 
 - (void) clearInputFields
 {
-  [self.customerName setStringValue: @""];
+  [self.firstResponderTextField setStringValue: @""];
   
   [self.licenseKey setStringValue: @""];
 }
